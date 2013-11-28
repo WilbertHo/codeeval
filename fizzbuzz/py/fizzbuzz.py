@@ -17,14 +17,13 @@ def main():
 
         # Print either the number, F, B, or FB
         for num in range(1, iterations+1):
-            if num % div1 == 0 and num % div2 == 0:
-                print "FB",
-            elif num % div1 == 0:
-                print "F",
-            elif num % div2 == 0:
-                print "B",
-            else:
-                print num,
+            if num % div1 == 0:
+                sys.stdout.write('F')
+            if num % div2 == 0:
+                sys.stdout.write('B')
+            if num % div1 and num % div2:
+                sys.stdout.write(str(num))
+            sys.stdout.write(' ')
         print '\n',
 
 if __name__ == '__main__':
