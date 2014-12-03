@@ -1,31 +1,53 @@
+package codeeval;
+
 import java.util.List;
 import java.util.ArrayList;
 
-class SieveOfEratosthenes {
-  public List<Integer> primesTo(int max) {
-    List<Integer> nums = new ArrayList<>();
-    List<Integer> primes = new ArrayList<>();
+import codeeval.PrimeFinder;
 
-    for(int i = 0; i <= max; ++i) {
-      nums.add(i);
-    }
+class SieveOfEratosthenes implements PrimeFinder {
+  int max = 1000;
+  List<Integer> primes = null;
 
-    return nums;
-
-    // int p = 2;
-    // for(int i = p; i <= max; i * 2) {
-    // }
-
-    // return primes;
+  SieveOfEratosthenes() {
+    primes = primesTo(max);
   }
 
-  public static void main(String[] args) {
-    SieveOfEratosthenes s = new SieveOfEratosthenes();
+  SieveOfEratosthenes(int max) {
+    primes = primesTo(max);
+    this.max = max;
+  }
 
-    int max = 1000;
-    List<Integer> nums = s.primesTo(max);
-    for(int i = 1; i <= max; ++i) {
-      System.out.println(nums.get(i));
+  private List<Integer> primesTo(int max) {
+    List<Integer> primes = new ArrayList<>();
+
+    for (int i = 0; i <= max; ++i) {
+      primes.add(i);
+    }
+
+    int p = 2;
+    while (p <= max) {
+      for (int i = p + p; i <= max; i += p) {
+        primes.set(i, 0);
+      }
+
+      // increment p to the next number not already crossed out/set to 0
+      for (++p; p <= max && primes.get(p) == 0; ++p) {}
+    }
+
+    return primes;
+  }
+
+  public boolean isPrime(int num) {
+    if (num > max) {
+      primes = primesTo(num);
+      max = num;
+    }
+
+    if (primes.get(num) != 0) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
