@@ -1,9 +1,13 @@
 class PrimePalindrome {
-  public String hi() {
-    System.out.println("hi");
-    return "hi"; 
+  public boolean isPrime(int num) {
+    return true;
   }
 
   public static void main(String[] args) {
+    System.out.println("hi");
+  }
+
+  public void hi() {
+    System.out.println("hi");
   }
 }

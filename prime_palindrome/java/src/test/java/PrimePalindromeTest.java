@@ -24,6 +24,13 @@ public class PrimePalindromeTest {
       PrimePalindrome pp = new PrimePalindrome();
       pp.hi();
       assertEquals("hi\n", output.toString());
-      assertEquals("hi", pp.hi());
+  }
+
+  @Test
+  public void testIsPrime() {
+    PrimePalindrome pp = new PrimePalindrome();
+    assertTrue(pp.isPrime(3));
+    assertTrue(pp.isPrime(503));
+    assertTrue(pp.isPrime(2887));
   }
 }
