@@ -6,5 +6,5 @@ apply plugin: 'java'
 
 dependencies {
     // testCompile 'junit:junit:[4,)'
-    testCompile 'junit:junit:4.10'
+    testCompile 'junit:junit:4.10+'
 }
