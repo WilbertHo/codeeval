@@ -1,5 +1,5 @@
 package codeeval;
 
 interface PalindromeFinder {
-  public boolean isPalindrome(String string);
+  public boolean isPalindrome(int num);
 }

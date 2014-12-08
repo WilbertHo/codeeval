@@ -8,6 +8,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import codeeval.PrimePalindrome;
+import codeeval.SieveOfEratosthenes;
+import codeeval.Palindrome;
 
 public class PrimePalindromeTest {
   private final PrintStream stdout = System.out;
@@ -28,5 +30,12 @@ public class PrimePalindromeTest {
       PrimePalindrome pp = new PrimePalindrome();
       pp.hi();
       assertEquals("hi\n", output.toString());
+  }
+
+  @Test
+  public void testPrimePalindrome() {
+      PrimePalindrome pp = new PrimePalindrome(new SieveOfEratosthenes(),
+                                               new Palindrome());
+      assertEquals(929, pp.findLargestPrimePalindrome(1000));
   }
 }

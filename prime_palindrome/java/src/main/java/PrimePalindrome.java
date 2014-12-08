@@ -20,8 +20,7 @@ class PrimePalindrome {
   }
 
   public boolean isPalindrome(int num) {
-    String string = new Integer(num).toString();
-    return palindromefinder.isPalindrome(string);
+    return palindromefinder.isPalindrome(num);
   }
 
   public boolean isPrime(int num) {
@@ -29,13 +28,25 @@ class PrimePalindrome {
   }
 
   public boolean isPrimePalindrome(int num) {
-    if (isPrime(num) && isPalindrome())
+    if (isPrime(num) && isPalindrome(num)) {
+      return true;
+    }
+    return false;
+  }
+
+  public int findLargestPrimePalindrome(int num) {
+    for (; num >= 0; --num) {
+      if (isPrimePalindrome(num)) {
+        return num;
+      }
+    }
+    return 0;
   }
 
   public static void main(String[] args) {
     PrimePalindrome pp = new PrimePalindrome(new SieveOfEratosthenes(),
                                              new Palindrome());
-    System.out.println("hi");
+    System.out.println(pp.findLargestPrimePalindrome(1000));
   }
 
   public void hi() {
