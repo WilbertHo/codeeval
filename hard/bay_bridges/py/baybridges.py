@@ -2,7 +2,6 @@
 import fileinput
 import re
 from collections import namedtuple
-from decimal import Decimal, getcontext
 from itertools import combinations
 
 
@@ -12,7 +11,7 @@ Segment = namedtuple('Segment', ['head', 'tail'])
 
 def parse_input(input):
     def str_to_coord(x):
-        return Decimal(re.sub(r'[^0-9-.]', '', x))
+        return float(re.sub(r'[^0-9-.]', '', x))
 
     bridge_number, coords = re.split(':\s*', input)
     bridge_number = str_to_coord(bridge_number)
@@ -31,7 +30,8 @@ def is_between(segment, coord):
             coord: Coord
     """
     cross = (coord.y - segment.head.y) * (segment.tail.x - segment.head.x) - (coord.x - segment.head.x) * (segment.tail.y - segment.head.y)
-    if abs(cross.quantize(Decimal('.000001'))) != 0:
+    # if abs(cross.quantize(Decimal('.000001'))) != 0:
+    if abs(round(cross)) != 0:
         return False
 
     dot = (coord.x - segment.head.x) * (segment.tail.x - segment.head.x) + (coord.y - segment.head.y) * (segment.tail.y - segment.head.y)
