@@ -77,25 +77,29 @@ def intersects(segment_a, segment_b):
                 is_between(segment_b, Coord(*intersection(segment_a, segment_b)))])
 
 
+def non_intersects(bridges):
+    """ Return largest set of non-intersecting bridges
+        Finds all combinations of bridges and calculates if there
+        are any intersections.
+        ex Check [1, 2, 3, 4, 5, 6], then [1, 2, 3, 4, 5], then
+           [1, 2, 3, 4, 6], ..., [1], [2], [3]
+        params:
+            bridges:
+    """
+    for size in range(len(bridges), 0, -1):
+        for subset in combinations(bridges.iteritems(), size):
+            if (all([not intersects(segment_a, segment_b)
+                     for (bridge_a, segment_a), (bridge_b, segment_b)
+                     in combinations(subset, 2)])):
+                return (map(lambda (bridge, segment): str(int(bridge)),
+                            subset))
+
+
 def main():
     input = [line.strip() for line in fileinput.input()]
     bridges = dict(map(parse_input, input))
 
-    # crossers = [sorted((bridge_a, bridge_b))
-    #             for (bridge_a, coords_a), (bridge_b, coords_b)
-    #             in combinations(bridges.iteritems(), 2)
-    #             if intersects(coords_a, coords_b)]
-
-    # for bridge in sorted(bridges.keys()):
-    #     if bridge not in crossers:
-    #         print bridge
-
-    for size in range(len(bridges), 0, -1):
-        for subset in combinations(bridges.iteritems(), size):
-            for (bridge_a, segment_a), (bridge_b, segment_b) \
-                in combinations(subset, 2):
-                    if not intersects(segment_a, segment_b):
-                        print bridge_a, bridge_b
+    print '\n'.join(non_intersects(bridges))
 
 
 if __name__ == '__main__':
