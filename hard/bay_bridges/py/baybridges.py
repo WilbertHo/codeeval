@@ -65,7 +65,13 @@ def intersection(s1, s2):
 
 
 def intersects(segment_a, segment_b):
-    """
+    """ Check if line segment_a intersects line segment_b
+        Extend segment_a and segment_b to infinity and calculate thed
+        point p of intersection, then determine if point p lies between
+        both segment_a and segment_b.
+        params:
+            segment_a: Segment
+            segment_b: Segment
     """
     return all([is_between(segment_a, Coord(*intersection(segment_a, segment_b))),
                 is_between(segment_b, Coord(*intersection(segment_a, segment_b)))])
