@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 import fileinput
 import re
-from ctypes import Structure, c_double
+from collections import namedtuple
+# from ctypes import Structure, c_double
 from itertools import combinations
 
 
-class Point(Structure):
-    _fields_ = [('x', c_double), ('y', c_double)]
+Point = namedtuple('Point', ['x', 'y'])
+# class Point(Structure):
+#     _fields_ = [('x', c_double), ('y', c_double)]
 
-class Segment(Structure):
-    _fields_ = [('head', Point), ('tail', Point)]
+Segment = namedtuple('Segment', ['head', 'tail'])
+# class Segment(Structure):
+#     _fields_ = [('head', Point), ('tail', Point)]
 
 
 # formulas are from
