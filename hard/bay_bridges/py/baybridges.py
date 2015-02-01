@@ -5,28 +5,28 @@ from ctypes import Structure, c_double
 from itertools import combinations
 
 
-class Coord(Structure):
+class Point(Structure):
     _fields_ = [('x', c_double), ('y', c_double)]
 
 class Segment(Structure):
-    _fields_ = [('head', Coord), ('tail', Coord)]
+    _fields_ = [('head', Point), ('tail', Point)]
 
 
 # formulas are from
 # https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
-def is_between(segment, coord):
-    """ Determine if coordinate (x, y) lies on line l.
-        Calculates if coord (x, y) lies between the coords comprising
+def is_between(segment, point):
+    """ Determine if pointinate (x, y) lies on line l.
+        Calculates if point (x, y) lies between the points comprising
         line segment l.
         params:
             line: Segment
-            coord: Coord
+            point: Point
     """
-    cross = (coord.y - segment.head.y) * (segment.tail.x - segment.head.x) - (coord.x - segment.head.x) * (segment.tail.y - segment.head.y)
+    cross = (point.y - segment.head.y) * (segment.tail.x - segment.head.x) - (point.x - segment.head.x) * (segment.tail.y - segment.head.y)
     if abs(round(cross)) != 0:
         return False
 
-    dot = (coord.x - segment.head.x) * (segment.tail.x - segment.head.x) + (coord.y - segment.head.y) * (segment.tail.y - segment.head.y)
+    dot = (point.x - segment.head.x) * (segment.tail.x - segment.head.x) + (point.y - segment.head.y) * (segment.tail.y - segment.head.y)
     if dot < 0:
         return False
 
@@ -65,26 +65,40 @@ def intersects(segment_a, segment_b):
             segment_a: Segment
             segment_b: Segment
     """
-    return all([is_between(segment_a, Coord(*intersection(segment_a, segment_b))),
-                is_between(segment_b, Coord(*intersection(segment_a, segment_b)))])
+    return all([is_between(segment_a, Point(*intersection(segment_a, segment_b))),
+                is_between(segment_b, Point(*intersection(segment_a, segment_b)))])
 
 
-def non_intersects(bridges):
+def get_nonintersecting(bridges):
     """ Return largest set of non-intersecting bridges
         Finds all combinations of bridges and calculates if there
         are any intersections.
         ex Check [1, 2, 3, 4, 5, 6], then [1, 2, 3, 4, 5], then
            [1, 2, 3, 4, 6], ..., [1], [2], [3]
         params:
-            bridges:
+            bridges: dict, map of bridge number to segment
+        returns:
+            non-intersecting bridges (list of ints)
     """
-    for size in range(len(bridges), 0, -1):
-        for subset in combinations(bridges.iteritems(), size):
+    crossing_bridges = [[bridge_a, bridge_b]
+                        for (bridge_a, segment_a), (bridge_b, segment_b)
+                        in combinations(bridges.iteritems(), 2)
+                        if intersects(segment_a, segment_b)]
+
+    # crossing_bridges is a nested list of crossing bridges, so we
+    # need to flatten it. ex: [[a, b], [a, c]] -> [a, b, a, c]
+    crossing_bridges = set([bridge for _bridges in crossing_bridges
+                            for bridge in _bridges])
+
+    # Start testing a subset of bridges without one or more of the
+    # bridges known to intersect
+    for size in range(1, len(crossing_bridges) + 1):
+        for intersecting in combinations(crossing_bridges, size):
+            subset = dict([(k, v) for k, v in bridges.iteritems() if k not in intersecting])
             if (all([not intersects(segment_a, segment_b)
                      for (bridge_a, segment_a), (bridge_b, segment_b)
-                     in combinations(subset, 2)])):
-                return (map(lambda (bridge, segment): str(int(bridge)),
-                            subset))
+                     in combinations(subset.iteritems(), 2)])):
+                return map(int, subset)
 
 
 def main():
@@ -93,14 +107,14 @@ def main():
             return float(re.sub(r'[^0-9-.]', '', x))
 
         bridge_number, coords = re.split(':\s*', input)
-        bridge_number = str_to_coord(bridge_number)
+        bridge_number = int(bridge_number)
         x1, y1, x2, y2 = map(str_to_coord, re.split(',\s*', coords))
-        return (bridge_number, Segment(Coord(x1, y1), Coord(x2, y2)))
+        return (bridge_number, Segment(Point(x1, y1), Point(x2, y2)))
 
     input = [line.strip() for line in fileinput.input()]
     bridges = dict(map(parse_input, input))
 
-    print '\n'.join(non_intersects(bridges))
+    print '\n'.join(map(lambda x: str(x), get_nonintersecting(bridges)))
 
 
 if __name__ == '__main__':
