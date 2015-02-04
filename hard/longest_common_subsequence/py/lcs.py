@@ -73,6 +73,7 @@ def longest_common_subsequence(s1, s2):
                 length[i][j] = length[i][j - 1]
                 lcs[i][j] = 'j'
 
+    print_lcs(lcs, s1, len(s1) - 1, len(s2) - 1)
     return length
 
 
@@ -101,6 +102,13 @@ def print_lcs(lcs, s, i, j):
             _       i/j are 0, so we're done.
           _ 0
     """
+    def print_array():
+        for _i in range(i):
+            for _j in range(j):
+                print (lcs[_i][_j] if lcs[_i][_j] else '0'),
+            print ''
+
+    print_array()
     if not i or not j:
         return
     if lcs[i][j] == 'm':
