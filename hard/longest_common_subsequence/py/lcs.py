@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from collections import namedtuple
 import fileinput
+import re
 
 
 def longest_common_subsequence_recur(s1, s2):
@@ -28,7 +28,7 @@ def longest_common_subsequence_recur(s1, s2):
                        lcs_r(s1, s2[:-1], accum, s))
 
     accum = dict()
-    helper(s1, s2, accum, '')
+    lcs_r(s1, s2, accum, '')
     return accum.get(max(accum.keys()))
 
 
@@ -73,11 +73,10 @@ def longest_common_subsequence(s1, s2):
                 length[i][j] = length[i][j - 1]
                 lcs[i][j] = 'j'
 
-    print_lcs(lcs, s1, len(s1) - 1, len(s2) - 1)
-    return length
+    return print_lcs(lcs, s1, len(s1) - 1, len(s2) - 1)
 
 
-def print_lcs(lcs, s, i, j):
+def print_lcs(lcs, s, i, j, accum=''):
     """ Return the longest common subsequence.
         Iterate over a 2d array starting from the largest i, j values.
         If the element is an 'm', that i (or j) is part of the LCS.
@@ -85,7 +84,7 @@ def print_lcs(lcs, s, i, j):
         If the element is an 'j', the array can be shrunk in the j dir.
         ex:
             _ A C   The first cell to be examined is (3, 2) 'm', so
-          _ 0 0 0   'C' is part of the LCS. Continue with [i-1][j-1], 
+          _ 0 0 0   'C' is part of the LCS. Continue with [i-1][j-1],
           A 0 m j   meaning we can drop the 'C' from both strings
           B 0 i j   (or just s).
           C 0 i m
@@ -103,26 +102,27 @@ def print_lcs(lcs, s, i, j):
           _ 0
     """
     def print_array():
-        for _i in range(i):
-            for _j in range(j):
+        for _i in range(i + 1):
+            for _j in range(j + 1):
                 print (lcs[_i][_j] if lcs[_i][_j] else '0'),
             print ''
 
-    print_array()
     if not i or not j:
-        return
+        return accum
     if lcs[i][j] == 'm':
-        print_lcs(lcs, s, i - 1, j - 1)
-        print s[i],
+        return print_lcs(lcs, s, i - 1, j - 1, s[i] + accum)
     elif lcs[i][j] == 'i':
-        return print_lcs(lcs, s, i - 1, j - 1)
+        return print_lcs(lcs, s, i - 1, j, accum)
     else:
-        return print_lcs(lcs, s, i, j  - 1)
-    
+        return print_lcs(lcs, s, i, j - 1, accum)
+
 
 def main():
-    input = [line.strip() for line in fileinput.input()].pop().split(';')
-    print longest_common_subsequence(*input)
+    input = [line.strip() for line in fileinput.input()]
+    for line in input:
+        if not re.search(r';', line):
+            continue
+        print longest_common_subsequence(*line.split(';'))
 
 
 if __name__ == '__main__':
