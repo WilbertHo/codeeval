@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from collections import defaultdict
+from collections import namedtuple
 import fileinput
 
 
@@ -18,22 +18,14 @@ def longest_common_subsequence_recur(s1, s2):
         returns:
             longest common subsequence: string
     """
-    def helper(s1, s2, accum, s):
+    def lcs_r(s1, s2, accum, s):
         if not s1 or not s2:
             return accum.update({len(s): s})
         if s1[-1] == s2[-1]:
-            return helper(s1[:-1], s2[:-1], accum, s1[-1] + s)
+            return lcs_r(s1[:-1], s2[:-1], accum, s1[-1] + s)
         else:
-            return max(helper(s1[:-1], s2, accum, s),
-                       helper(s1, s2[:-1], accum, s))
-
-    # if not s1 or not s2:
-    #     return 0
-    # if s1[-1] == s2[-1]:
-    #     return longest_common_subsequence_recur(s1[:-1], s2[:-1]) + 1
-    # else:
-    #     return max(longest_common_subsequence_recur(s1[:-1], s2),
-    #                longest_common_subsequence_recur(s1, s2[:-1]))
+            return max(lcs_r(s1[:-1], s2, accum, s),
+                       lcs_r(s1, s2[:-1], accum, s))
 
     accum = dict()
     helper(s1, s2, accum, '')
@@ -55,19 +47,74 @@ def longest_common_subsequence(s1, s2):
         returns:
             longest common subsequence: string
     """
+    # Add a space to the beginning of each string so:
+    # 1. comparing one string to another of 0-length should be 0
+    # 2. makes for easier bounds
     s1 = ' ' + s1
     s2 = ' ' + s2
+
     # Create a 2D array to keep track of the LCS between two
     # substrings of s1, s2
-    lcs = [[0 for i in range(len(s1))] for j in range(len(s2))]
-    for i in enumerate(s1, start=1):
-        for j in enumerate(s2, start=1):
-            pass
+    length = [[0 for j in range(len(s2))] for i in range(len(s1))]
+    lcs = [['' for j in range(len(s2))] for i in range(len(s1))]
+    for i in range(1, len(s1)):
+        for j in range(1, len(s2)):
+            if s1[i] == s2[j]:
+                length[i][j] = length[i - 1][j - 1] + 1
+                lcs[i][j] = 'm'
+            elif length[i - 1][j] > length[i][j - 1]:
+                # Can still find the LCS with s1 shortened by 1
+                # ex: s1 = 'AB, s2 = 'B', s1 can drop 'B' and
+                # LCS will still be 'A'
+                length[i][j] = length[i - 1][j]
+                lcs[i][j] = 'i'
+            else:
+                # Can still find the LCS with s2 shortened by 1
+                length[i][j] = length[i][j - 1]
+                lcs[i][j] = 'j'
 
+    return length
+
+
+def print_lcs(lcs, s, i, j):
+    """ Return the longest common subsequence.
+        Iterate over a 2d array starting from the largest i, j values.
+        If the element is an 'm', that i (or j) is part of the LCS.
+        If the element is an 'i', the array can be shrunk in the i dir.
+        If the element is an 'j', the array can be shrunk in the j dir.
+        ex:
+            _ A C   The first cell to be examined is (3, 2) 'm', so
+          _ 0 0 0   'C' is part of the LCS. Continue with [i-1][j-1], 
+          A 0 m j   meaning we can drop the 'C' from both strings
+          B 0 i j   (or just s).
+          C 0 i m
+
+            _ A     Examining (2, 1) gives 'i', so we can drop one
+          _ 0 0     line in the 'i' direction. This is equivalent
+          A 0 m     to comparing 'A' and 'AB' and dropping 'B'
+          B 0 i
+
+            _ A     Examining (1, 1) gives 'm', so 'A' is part of
+          _ 0 0     the LCS.
+          A 0 m     Continue with [i-1][j-1]
+
+            _       i/j are 0, so we're done.
+          _ 0
+    """
+    if not i or not j:
+        return
+    if lcs[i][j] == 'm':
+        print_lcs(lcs, s, i - 1, j - 1)
+        print s[i],
+    elif lcs[i][j] == 'i':
+        return print_lcs(lcs, s, i - 1, j - 1)
+    else:
+        return print_lcs(lcs, s, i, j  - 1)
+    
 
 def main():
     input = [line.strip() for line in fileinput.input()].pop().split(';')
-    print longest_common_subsequence_recur(*input)
+    print longest_common_subsequence(*input)
 
 
 if __name__ == '__main__':
