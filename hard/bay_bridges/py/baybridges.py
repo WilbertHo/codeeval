@@ -8,65 +8,64 @@ from itertools import combinations
 class Point(Structure):
     _fields_ = [('x', c_double), ('y', c_double)]
 
-class Segment(Structure):
-    _fields_ = [('head', Point), ('tail', Point)]
+# class Segment(Structure):
+#     _fields_ = [('head', Point), ('tail', Point)]
 
+class Segment(object):
+    def __init__(self, head, tail):
+        self.head = head
+        self.tail = tail
 
-# formulas are from
-# https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
-def is_between(segment, point):
-    """ Determine if point (x, y) lies on line l.
-        Calculates if point (x, y) lies between the points comprising
-        line segment l.
-        params:
-            line: Segment
-            point: Point
-    """
-    cross = (point.y - segment.head.y) * (segment.tail.x - segment.head.x) - (point.x - segment.head.x) * (segment.tail.y - segment.head.y)
-    if abs(round(cross)) != 0:
-        return False
+    # formulas are from
+    # https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+    def has_point(self, point):
+        """ Determine if point (x, y) lies on this line. 
+            Calculates if point (x, y) lies between the points comprising
+            this line segment.
+            params:
+                point: Point
+        """
+        cross = (point.y - self.head.y) * (self.tail.x - self.head.x) - (point.x - self.head.x) * (self.tail.y - self.head.y)
+        if abs(round(cross)) != 0:
+            return False
 
-    dot = (point.x - segment.head.x) * (segment.tail.x - segment.head.x) + (point.y - segment.head.y) * (segment.tail.y - segment.head.y)
-    if dot < 0:
-        return False
+        dot = (point.x - self.head.x) * (self.tail.x - self.head.x) + (point.y - self.head.y) * (self.tail.y - self.head.y)
+        if dot < 0:
+            return False
 
-    length = (segment.tail.x - segment.head.x) * (segment.tail.x - segment.head.x) + (segment.tail.y - segment.head.y) * (segment.tail.y - segment.head.y)
-    if dot > length:
-        return False
+        length = (self.tail.x - self.head.x) * (self.tail.x - self.head.x) + (self.tail.y - self.head.y) * (self.tail.y - self.head.y)
+        if dot > length:
+            return False
 
-    return True
+        return True
 
+    # intersection formulas are from
+    # https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
+    def intersection(self, s):
+        """ Calculate the point of intersection between self and segment s.
+            Extend self and segment s to infinity and calculate the
+            point of intersection.
+            params:
+                s: Segment
+        """
+        x = ((self.head.x * self.tail.y - self.head.y * self.tail.x) * (s.head.x - s.tail.x) - (self.head.x - self.tail.x) * (s.head.x * s.tail.y - s.head.y * s.tail.x)) / \
+            ((self.head.x - self.tail.x) * (s.head.y - s.tail.y) - (self.head.y - self.tail.y) * (s.head.x - s.tail.x))
 
-# intersection formulas are from
-# https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
-def intersection(s1, s2):
-    """ Calculate the point of intersection between segments s1 and s2.
-        Extend line segments s1 and 2 to infinity and calculate the
-        point of intersection.
-        params:
-            s1: Segment
-            s2: Segment
-    """
-    x = ((s1.head.x * s1.tail.y - s1.head.y * s1.tail.x) * (s2.head.x - s2.tail.x) - (s1.head.x - s1.tail.x) * (s2.head.x * s2.tail.y - s2.head.y * s2.tail.x)) / \
-        ((s1.head.x - s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x - s2.tail.x))
+        y = ((self.head.x * self.tail.y - self.head.y * self.tail.x) * (s.head.y - s.tail.y) - (self.head.y - self.tail.y) * (s.head.x * s.tail.y - s.head.y * s.tail.x)) / \
+            ((self.head.x - self.tail.x) * (s.head.y - s.tail.y) - (self.head.y - self.tail.y) * (s.head.x - s.tail.x))
 
-    y = ((s1.head.x * s1.tail.y - s1.head.y * s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x * s2.tail.y - s2.head.y * s2.tail.x)) / \
-        ((s1.head.x - s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x - s2.tail.x))
+        return Point(x, y)
 
-    return Point(x, y)
-
-
-def intersects(segment_a, segment_b):
-    """ Check if line segment_a intersects line segment_b
-        Extend segment_a and segment_b to infinity and calculate thed
-        point p of intersection, then determine if point p lies between
-        both segment_a and segment_b.
-        params:
-            segment_a: Segment
-            segment_b: Segment
-    """
-    return all([is_between(segment_a, intersection(segment_a, segment_b)),
-                is_between(segment_b, intersection(segment_a, segment_b))])
+    def intersects(self, s):
+        """ Check if self intersects segment s
+            Extend self and segment s to infinity and calculate the
+            point p of intersection, then determine if point p lies between
+            both self and segment s.
+            params:
+                s: Segment
+        """
+        return self.has_point(self.intersection(s)) and \
+               s.has_point(s.intersection(self))
 
 
 def get_nonintersecting(bridges):
@@ -83,7 +82,7 @@ def get_nonintersecting(bridges):
     crossing_bridges = [[bridge_a, bridge_b]
                         for (bridge_a, segment_a), (bridge_b, segment_b)
                         in combinations(bridges.iteritems(), 2)
-                        if intersects(segment_a, segment_b)]
+                        if segment_a.intersects(segment_b)]
 
     # crossing_bridges is a nested list of crossing bridges, so we
     # need to flatten it. ex: [[a, b], [a, c]] -> [a, b, a, c]
@@ -95,7 +94,7 @@ def get_nonintersecting(bridges):
     for size in range(1, len(crossing_bridges) + 1):
         for intersecting in combinations(crossing_bridges, size):
             subset = dict([(k, v) for k, v in bridges.iteritems() if k not in intersecting])
-            if (all([not intersects(segment_a, segment_b)
+            if (all([not segment_a.intersects(segment_b)
                      for (bridge_a, segment_a), (bridge_b, segment_b)
                      in combinations(subset.iteritems(), 2)])):
                 return map(int, subset)
