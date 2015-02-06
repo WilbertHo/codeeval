@@ -1,5 +1,5 @@
 from nose.tools import eq_
-from baybridges import Point, Segment, intersects, get_nonintersecting
+from baybridges import Point, Segment, intersects, get_nonintersecting, is_between
 
 
 def test_intersects():
@@ -17,3 +17,12 @@ def test_get_nonintersecting():
             3: Segment(Point(37.516262, -122.198181), Point(37.653383, -122.151489))}
 
     eq_(get_nonintersecting(bridges), [2, 3])
+
+
+def test_in_between():
+    point = Point(37.788353, -122.387695)
+    s1 = Segment(point, Point(37.829853, -122.294312))
+    out = Point(37.474858, -122.131577)
+
+    eq_(is_between(s1, point), True)
+    eq_(is_between(s1, out), False)
