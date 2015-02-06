@@ -15,7 +15,7 @@ class Segment(Structure):
 # formulas are from
 # https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
 def is_between(segment, point):
-    """ Determine if pointinate (x, y) lies on line l.
+    """ Determine if point (x, y) lies on line l.
         Calculates if point (x, y) lies between the points comprising
         line segment l.
         params:
@@ -53,7 +53,7 @@ def intersection(s1, s2):
     y = ((s1.head.x * s1.tail.y - s1.head.y * s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x * s2.tail.y - s2.head.y * s2.tail.x)) / \
         ((s1.head.x - s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x - s2.tail.x))
 
-    return x, y
+    return Point(x, y)
 
 
 def intersects(segment_a, segment_b):
@@ -65,8 +65,8 @@ def intersects(segment_a, segment_b):
             segment_a: Segment
             segment_b: Segment
     """
-    return all([is_between(segment_a, Point(*intersection(segment_a, segment_b))),
-                is_between(segment_b, Point(*intersection(segment_a, segment_b)))])
+    return all([is_between(segment_a, intersection(segment_a, segment_b)),
+                is_between(segment_b, intersection(segment_a, segment_b))])
 
 
 def get_nonintersecting(bridges):
