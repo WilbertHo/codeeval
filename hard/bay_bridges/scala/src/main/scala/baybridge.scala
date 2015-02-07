@@ -1,54 +1,78 @@
 class Point(val x: Double, val y: Double) {}
-class Segment(val head: Point, val tail: Point) {}
 
-class BayBridges {
-  def intersection(s1: Segment, s2:Segment): Point = {
-    /* Calculate the point of intersection between segments s1 and s2.
+class Segment(val head: Point, val tail: Point) {
+  def intersection(s: Segment): Point = {
+    /* Calculate the point of intersection between this and segment s
      * Extend line segments s1 and 2 to infinity and calculate the
      * point of intersection.
      */ 
 
-      val x = ((s1.head.x * s1.tail.y - s1.head.y * s1.tail.x) * (s2.head.x - s2.tail.x) - (s1.head.x - s1.tail.x) * (s2.head.x * s2.tail.y - s2.head.y * s2.tail.x)) /
-              ((s1.head.x - s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x - s2.tail.x))
+      val x = ((head.x * tail.y - head.y * tail.x) * (s.head.x - s.tail.x) - (head.x - tail.x) * (s.head.x * s.tail.y - s.head.y * s.tail.x)) /
+              ((head.x - tail.x) * (s.head.y - s.tail.y) - (head.y - tail.y) * (s.head.x - s.tail.x))
 
-      val y = ((s1.head.x * s1.tail.y - s1.head.y * s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x * s2.tail.y - s2.head.y * s2.tail.x)) /
-              ((s1.head.x - s1.tail.x) * (s2.head.y - s2.tail.y) - (s1.head.y - s1.tail.y) * (s2.head.x - s2.tail.x))
+      val y = ((head.x * tail.y - head.y * tail.x) * (s.head.y - s.tail.y) - (head.y - tail.y) * (s.head.x * s.tail.y - s.head.y * s.tail.x)) /
+              ((head.x - tail.x) * (s.head.y - s.tail.y) - (head.y - tail.y) * (s.head.x - s.tail.x))
 
       return new Point(x, y)
   }
 
-  def is_between(segment: Segment, point: Point): Boolean = {
-    /* Determine if point (x, y) lies on line l.
-     * Calculates if point (x, y) lies between the points comprising
-     * line segment l.
-     */
-
-    val cross = (point.y - segment.head.y) * (segment.tail.x - segment.head.x) - (point.x - segment.head.x) * (segment.tail.y - segment.head.y)
-    if (math.abs(math.round(cross)) != 0)
-        return false
-
-    val dot = (point.x - segment.head.x) * (segment.tail.x - segment.head.x) + (point.y - segment.head.y) * (segment.tail.y - segment.head.y)
-    if (dot < 0)
-        return false
-
-    val length = (segment.tail.x - segment.head.x) * (segment.tail.x - segment.head.x) + (segment.tail.y - segment.head.y) * (segment.tail.y - segment.head.y)
-    if (dot > length)
-        return false
-
-    return true
-  }
-
-  def intersects(segment_a: Segment, segment_b: Segment): Boolean = {
+  def intersects(segment: Segment): Boolean = {
     /* Check if line segment_a intersects line segment_b
      * Extend segment_a and segment_b to infinity and calculate the
      * point p of intersection, then determine if point p lies between
      * both segment_a and segment_b.
      */
       
-    val foo = List(is_between(segment_a, intersection(segment_a, segment_b)),
-                   is_between(segment_b, intersection(segment_a, segment_b)))
-    return foo.forall(_ == true)
+    return has_point(intersection(segment)) &&
+           segment.has_point(segment.intersection(this))
   }
+
+  def has_point(point: Point): Boolean = {
+    /* Determine if point (x, y) lies on line l.
+     * Calculates if point (x, y) lies between the points comprising
+     * line segment l.
+     */
+
+    val cross = (point.y - head.y) * (tail.x - head.x) - (point.x - head.x) * (tail.y - head.y)
+    if (math.abs(math.round(cross)) != 0)
+        return false
+
+    val dot = (point.x - head.x) * (tail.x - head.x) + (point.y - head.y) * (tail.y - head.y)
+    if (dot < 0)
+        return false
+
+    val length = (tail.x - head.x) * (tail.x - head.x) + (tail.y - head.y) * (tail.y - head.y)
+    if (dot > length)
+        return false
+
+    return true
+  }
+}
+
+class BayBridges {
+  def get_non_intersecting(bridges: Map[Int, Segment]): Seq[Int] = {
+    val crossing_bridges = bridges.toSeq.combinations(2).toSeq.flatMap {
+      case Seq((bridge_a, segment_a), (bridge_b, segment_b)) =>
+        if (segment_a.intersects(segment_b)) {
+          Seq(bridge_a, bridge_b)
+        } else {
+          None
+        }
+    }.toSet
+
+    for (length <- 1 to crossing_bridges.size) {
+      for (subset <- crossing_bridges.toSeq.combinations(length)) {
+          if ((bridges.keys.toList.diff(subset).combinations(2).map {
+            case Seq(bridge_a, bridge_b) =>
+              bridges(bridge_a).intersects(bridges(bridge_b))
+          }).forall( _ == false )) {
+            return bridges.keys.toList.diff(subset).sorted
+          }
+      }
+    }
+  return List(0)
+  }
+
 }
 
 object Main {
@@ -80,6 +104,8 @@ object Main {
     val input = (if (args.length < 1) io.Source.stdin
                  else io.Source.fromFile(args(0))).getLines().toVector
     
-    print(parse_input(input))
+    val bb = new BayBridges()
+    val bridges = parse_input(input)
+    println(bb.get_non_intersecting(bridges).mkString("\n"))
   }
 }
