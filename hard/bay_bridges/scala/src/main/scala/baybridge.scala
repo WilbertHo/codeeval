@@ -50,15 +50,18 @@ class Segment(val head: Point, val tail: Point) {
 }
 
 class BayBridges {
-  def get_non_intersecting(bridges: Map[Int, Segment]): Seq[Int] = {
-    val crossing_bridges = bridges.toSeq.combinations(2).toSeq.flatMap {
+  def get_crossing(bridges: Map[Int, Segment]): Set[Int] = {
+    return bridges.toSeq.combinations(2).filter {
       case Seq((bridge_a, segment_a), (bridge_b, segment_b)) =>
-        if (segment_a.intersects(segment_b)) {
+        segment_a.intersects(segment_b)
+      }.flatMap{
+        case Seq((bridge_a, segment_a), (bridge_b, segment_b)) =>
           Seq(bridge_a, bridge_b)
-        } else {
-          None
-        }
-    }.toSet
+      }.toSet
+  }
+
+  def get_non_intersecting(bridges: Map[Int, Segment]): Seq[Int] = {
+    val crossing_bridges = get_crossing(bridges)
 
     for (length <- 1 to crossing_bridges.size) {
       for (subset <- crossing_bridges.toSeq.combinations(length)) {
