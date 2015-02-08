@@ -63,19 +63,13 @@ class BayBridges {
   def get_non_intersecting(bridges: Map[Int, Segment]): Seq[Int] = {
     val crossing_bridges = get_crossing(bridges)
 
-    for (length <- 1 to crossing_bridges.size) {
-      for (subset <- crossing_bridges.toSeq.combinations(length)) {
-          if ((bridges.keys.toList.diff(subset).combinations(2).map {
-            case Seq(bridge_a, bridge_b) =>
-              bridges(bridge_a).intersects(bridges(bridge_b))
-          }).forall( _ == false )) {
-            return bridges.keys.toList.diff(subset).sorted
-          }
-      }
-    }
-  return List(0)
+    return bridges.keys.toSeq.diff(
+      (1 to crossing_bridges.size).flatMap( length =>
+          crossing_bridges.toSeq.combinations(length)).view.filter( subset =>
+            bridges.keys.toList.diff(subset).combinations(2).map {
+              case Seq(a, b) => bridges(a).intersects(bridges(b))
+            }.forall(_ == false)).take(1)(0)).sorted
   }
-
 }
 
 object Main {
