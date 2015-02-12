@@ -50,10 +50,16 @@ class Segment(val head: Point, val tail: Point) {
 }
 
 class BayBridges {
+  /**
+   * Return set of intersecting bridges.
+   */
   def get_crossing(bridges: Map[Int, Segment]): Set[Int] = {
+    // Take each combination of two bridges
     return bridges.toSeq.combinations(2).filter {
+      // and check if they intersect
       case Seq((bridge_a, segment_a), (bridge_b, segment_b)) =>
         segment_a.intersects(segment_b)
+      // return a flat list of (bridge, bridge)
       }.flatMap{
         case Seq((bridge_a, segment_a), (bridge_b, segment_b)) =>
           Seq(bridge_a, bridge_b)
@@ -64,8 +70,11 @@ class BayBridges {
     val crossing_bridges = get_crossing(bridges)
 
     return bridges.keys.toSeq.diff(
+      // Start by removing a single bridge, then increment by one
       (1 to crossing_bridges.size).flatMap( length =>
+          // Remove the subset of above bridges from the original set
           crossing_bridges.toSeq.combinations(length)).view.filter( subset =>
+            // Return the subset for which there are no intersections
             bridges.keys.toList.diff(subset).combinations(2).map {
               case Seq(a, b) => bridges(a).intersects(bridges(b))
             }.forall(_ == false)).take(1)(0)).sorted
