@@ -1,4 +1,4 @@
-(ns clj.core
+(ns fizzbuzz.core
   ; (:require [clojure.string :as str])
   (:gen-class))
 

@@ -1,6 +1,6 @@
-(ns clj.core-test
+(ns fizzbuzz.core-test
   (:require [clojure.test :refer :all]
-            [clj.core :refer :all]))
+            [fizzbuzz.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
