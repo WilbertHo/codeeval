@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import fileinput
+import functools
+import multiprocessing
 import sys
 
 
@@ -14,13 +16,19 @@ def fizzbuzz(fizz, buzz, n):
     return token
 
 
-def main():
-    lines = [line.strip() for line in fileinput.input()]
+def fizzbuzz_helper(_args):
+    fizz, buzz, n = map(int, _args.split())
+    return map(functools.partial(fizzbuzz, fizz, buzz), range(1, n + 1))
 
-    for line in lines:
-        fizz, buzz, n = map(int, line.split())
-        output = map(lambda n: fizzbuzz(fizz, buzz, n), range(1, n + 1))
-        print " ".join(output)
+
+def main():
+    lines = [line.strip() for line in fileinput.input() if line]
+
+    pool = multiprocessing.Pool()
+    output = pool.map(fizzbuzz_helper, lines)
+
+    for line in output:
+        print " ".join(line)
 
 
 if __name__ == '__main__':
