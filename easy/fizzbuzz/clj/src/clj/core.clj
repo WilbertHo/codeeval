@@ -1,12 +1,24 @@
 (ns clj.core
+  ; (:require [clojure.string :as str])
   (:gen-class))
 
 (defn fizzbuzz
-  [x]
-  (let [s (str (if (zero? (mod x 3)) "Fizz")
-               (if (zero? (mod x 5)) "Buzz"))]
-    (if (empty? s) x s)))
+  [fizz buzz x]
+  (let [s (str (if (zero?
+                 (mod x fizz))
+                 "F")
+               (if (zero?
+                 (mod x buzz))
+                 "B"))]
+    (if (empty? s)
+      x
+      s)))
 
 (defn -main
   [& args]
-  (println (map fizzbuzz (range 1 101))))
+  (doseq [line (line-seq (java.io.BufferedReader.
+                           (if (> (count *command-line-args*) 0)
+                             (java.io.FileReader. (first *command-line-args*))
+                             *in*)))]
+    (let [[fizz buzz end] (map read-string (clojure.string/split line #"\s+"))]
+      (apply println (map (partial fizzbuzz fizz buzz) (range 1 (+ end 1)))))))
