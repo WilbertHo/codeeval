@@ -76,13 +76,14 @@ def get_all_substrings(string):
                                          for r in range(2, len(string) + 1))))
 
     yield [int(string)]
-    yield [-1 * int(string)]
+    # yield [-1 * int(string)]
 
     for split in splits:
         # Create a power set of '-, +' of the length of the split, with an
         # additional token for the leading 0 position
         # (1, 2) -> [(-, -, -), (-, -, +), (-, +, -), ...
-        signs = map(deque, product(OPERATORS, repeat=len(split)+1))
+        # signs = map(deque, product(OPERATORS, repeat=len(split)))
+        signs = product(OPERATORS, repeat=len(split))
 
         # Convert the (1, 2) string split specifiers into slice notation
         # ex (1, 2) for 'abcd' 
@@ -96,9 +97,9 @@ def get_all_substrings(string):
         # ex: zip(['-', '+', '-'],
         #         ['a', 'bc', 'cde'])
         ## string_ops = map(lambda sign: list(chain.from_iterable(
-        ##                                zip(sign, sliced_string))),
+        ##                                zip(('+',) + sign, sliced_string))),
         ##                  signs)
-        operations = map(lambda sign: zip(sign, sliced_string), signs)
+        operations = map(lambda sign: zip(('+',) + sign, sliced_string), signs)
 
         for operation in operations:
             # Apply the operator to the operand
@@ -114,11 +115,12 @@ def is_ugly(n):
 
 
 def main():
-    lines = [line.strip() for line in fileinput.input()]
+    lines = [line.strip() for line in fileinput.input() if line]
 
     for line in lines:
         substrings = get_all_substrings(line)
-        print len([is_ugly(sum(s)) for s in substrings])
+        print len(filter(None, [is_ugly(sum(substring))
+                                for substring in substrings]))
 
 
 if __name__ == '__main__':
