@@ -58,7 +58,9 @@ from itertools import chain, combinations, islice, permutations, product
 def get_all_substrings(string):
     """ Return all substrings of input string combined with '-' and '+'
     """
-    OPERATORS = '-+'
+    # OPERATORS = '-+'
+    OPERATORS = {'-': lambda x: -1 * x,
+                 '+': lambda x: x}
     # Generate all the possible places we could split the string
     # Ex, for string 'abcde'
     # 1 split -> a bcde, ab cde, abc de, abcd e
@@ -73,7 +75,9 @@ def get_all_substrings(string):
                      chain.from_iterable(combinations(range(len(string)), r)
                                          for r in range(2, len(string) + 1))))
 
-    substrings = [[string], ['-', string]]
+    yield [int(string)]
+    yield [-1 * int(string)]
+
     for split in splits:
         # Create a power set of '-, +' of the length of the split, with an
         # additional token for the leading 0 position
@@ -91,11 +95,16 @@ def get_all_substrings(string):
         # Zip up the signs with the sliced up string
         # ex: zip(['-', '+', '-'],
         #         ['a', 'bc', 'cde'])
-        substrings.extend(map(lambda sign: list(chain.from_iterable(
-                                            zip(sign, sliced_string))),
-                              signs))
+        ## string_ops = map(lambda sign: list(chain.from_iterable(
+        ##                                zip(sign, sliced_string))),
+        ##                  signs)
+        operations = map(lambda sign: zip(sign, sliced_string), signs)
 
-    return substrings or [string]
+        for operation in operations:
+            # Apply the operator to the operand
+            # ex: ['-', '1', '-', '2', '+', '345']
+            yield map(lambda (op, operand): OPERATORS.get(op)(int(operand)),
+                       operation)
 
 
 def is_ugly(n):
@@ -109,7 +118,7 @@ def main():
 
     for line in lines:
         substrings = get_all_substrings(line)
-        print substrings
+        print len([is_ugly(sum(s)) for s in substrings])
 
 
 if __name__ == '__main__':
