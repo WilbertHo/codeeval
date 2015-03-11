@@ -58,9 +58,7 @@ from itertools import chain, combinations, islice, permutations, product
 def get_all_substrings(string):
     """ Return all substrings of input string combined with '-' and '+'
     """
-    # OPERATORS = '-+'
-    OPERATORS = {'-': lambda x: -1 * x,
-                 '+': lambda x: x}
+    OPERATORS = '-+'
     # Generate all the possible places we could split the string
     # Ex, for string 'abcde'
     # 1 split -> a bcde, ab cde, abc de, abcd e
@@ -72,8 +70,8 @@ def get_all_substrings(string):
     # (0, 1, 3, 4) so we solve this by removing the 0 and creating a
     # set.
     splits = set(map(lambda x: filter(None, x),
-                     chain.from_iterable(combinations(range(len(string)), r)
-                                         for r in range(2, len(string) + 1))))
+                     chain.from_iterable(combinations(xrange(len(string)), r)
+                                         for r in xrange(2, len(string) + 1))))
 
     yield [int(string)]
 
@@ -87,7 +85,7 @@ def get_all_substrings(string):
         # ex (1, 2) for 'abcd' 
         # zip([0, 1, 2, 4], [1, 2, 4]) == [(0, 1), (1, 2), (2, 4)]
         slices = zip(*(islice((0,) + split + (len(string),), n, None)
-                       for n in range(2)))
+                       for n in xrange(2)))
         sliced_string = map(lambda (start, end): int(string[start:end]),
                             slices)
 
@@ -102,7 +100,7 @@ def get_all_substrings(string):
         for operation in operations:
             # Apply the operator to the operand
             # ex: ['-', '1', '-', '2', '+', '345']
-            yield map(lambda (op, operand): OPERATORS.get(op)(operand),
+            yield map(lambda (op, operand): operand * -1 if op == '-' else operand,
                        operation)
 
 
