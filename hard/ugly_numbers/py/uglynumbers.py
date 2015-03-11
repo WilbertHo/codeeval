@@ -76,13 +76,11 @@ def get_all_substrings(string):
                                          for r in range(2, len(string) + 1))))
 
     yield [int(string)]
-    # yield [-1 * int(string)]
 
     for split in splits:
         # Create a power set of '-, +' of the length of the split, with an
         # additional token for the leading 0 position
         # (1, 2) -> [(-, -, -), (-, -, +), (-, +, -), ...
-        # signs = map(deque, product(OPERATORS, repeat=len(split)))
         signs = product(OPERATORS, repeat=len(split))
 
         # Convert the (1, 2) string split specifiers into slice notation
@@ -90,7 +88,7 @@ def get_all_substrings(string):
         # zip([0, 1, 2, 4], [1, 2, 4]) == [(0, 1), (1, 2), (2, 4)]
         slices = zip(*(islice((0,) + split + (len(string),), n, None)
                        for n in range(2)))
-        sliced_string = map(lambda (start, end): string[start:end],
+        sliced_string = map(lambda (start, end): int(string[start:end]),
                             slices)
 
         # Zip up the signs with the sliced up string
@@ -104,7 +102,7 @@ def get_all_substrings(string):
         for operation in operations:
             # Apply the operator to the operand
             # ex: ['-', '1', '-', '2', '+', '345']
-            yield map(lambda (op, operand): OPERATORS.get(op)(int(operand)),
+            yield map(lambda (op, operand): OPERATORS.get(op)(operand),
                        operation)
 
 
