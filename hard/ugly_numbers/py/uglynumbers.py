@@ -50,22 +50,58 @@ for each test case, each one on a new line. E.g.
 6
 64
 """
+from collections import deque
 import fileinput
 from itertools import chain, combinations, islice, permutations, product
 
 
 def get_all_substrings(string):
-    # splits = [filter(None, j) for i in xrange(2, len(string) + 1)
-    #                           for j in combinations(range(len(string)), i)]
+    """ Return all substrings of input string combined with '-' and '+'
+    """
+    OPERATORS = '-+'
+    # Generate all the possible places we could split the string
+    # Ex, for string 'abcde'
+    # 1 split -> a bcde, ab cde, abc de, abcd e
+    # 2 splits -> a b cde, a bc de
+    # We'll model where to split the string by creating power sets
+    # for length starting from 2 until the length of the input string
+    # (0, 1), (0, 2), ..., (0, 1, 2), ..., (0, 1, 2, 3, 4)
+    # The resulting power sets will have duplicates, ie (1, 3, 4) and
+    # (0, 1, 3, 4) so we solve this by removing the 0 and creating a
+    # set.
     splits = set(map(lambda x: filter(None, x),
                      chain.from_iterable(combinations(range(len(string)), r)
                                          for r in range(2, len(string) + 1))))
-    substrings = []
+
+    substrings = [[string], ['-', string]]
     for split in splits:
-        substrings.append(''.join([',' + c if i in split else c
-                                   for i, c in enumerate(string)]))
+        # Create a power set of '-, +' of the length of the split, with an
+        # additional token for the leading 0 position
+        # (1, 2) -> [(-, -, -), (-, -, +), (-, +, -), ...
+        signs = map(deque, product(OPERATORS, repeat=len(split)+1))
+
+        # Convert the (1, 2) string split specifiers into slice notation
+        # ex (1, 2) for 'abcd' 
+        # zip([0, 1, 2, 4], [1, 2, 4]) == [(0, 1), (1, 2), (2, 4)]
+        slices = zip(*(islice((0,) + split + (len(string),), n, None)
+                       for n in range(2)))
+        sliced_string = map(lambda (start, end): string[start:end],
+                            slices)
+
+        # Zip up the signs with the sliced up string
+        # ex: zip(['-', '+', '-'],
+        #         ['a', 'bc', 'cde'])
+        substrings.extend(map(lambda sign: list(chain.from_iterable(
+                                            zip(sign, sliced_string))),
+                              signs))
 
     return substrings or [string]
+
+
+def is_ugly(n):
+    if n == 0 or n % 2 == 0 or n % 3 == 0 or n % 5 == 0 or n % 7 == 0:
+        return True
+    return False
 
 
 def main():
