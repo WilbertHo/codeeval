@@ -2,7 +2,7 @@
 import fileinput
 import re
 from ctypes import Structure, c_double
-from itertools import combinations
+from itertools import chain, combinations
 
 
 class Point(Structure):
@@ -86,8 +86,7 @@ def get_nonintersecting(bridges):
 
     # crossing_bridges is a nested list of crossing bridges, so we
     # need to flatten it. ex: [[a, b], [a, c]] -> [a, b, a, c]
-    crossing_bridges = set([bridge for _bridges in crossing_bridges
-                            for bridge in _bridges])
+    crossing_bridges = set(chain.from_iterable(crossing_bridges))
 
     # Start testing a subset of bridges without one or more of the
     # bridges known to intersect
