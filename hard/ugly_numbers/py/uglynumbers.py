@@ -65,13 +65,10 @@ def get_all_substrings(string):
     # 2 splits -> a b cde, a bc de
     # We'll model where to split the string by creating power sets
     # for length starting from 2 until the length of the input string
-    # (0, 1), (0, 2), ..., (0, 1, 2), ..., (0, 1, 2, 3, 4)
-    # The resulting power sets will have duplicates, ie (1, 3, 4) and
-    # (0, 1, 3, 4) so we solve this by removing the 0 and creating a
-    # set.
-    splits = set(map(lambda x: filter(None, x),
-                     chain.from_iterable(combinations(xrange(len(string)), r)
-                                         for r in xrange(2, len(string) + 1))))
+    # (1,), (2,), ..., (1, 2,), (2, 3,), ..., (1, 2, 3, 4)
+    splits = list(chain.from_iterable(
+                combinations(range(1, len(string)), n)
+                for n in range(1, len(string))))
 
     yield [int(string)]
 
