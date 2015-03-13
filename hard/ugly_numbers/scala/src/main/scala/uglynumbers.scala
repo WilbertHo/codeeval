@@ -12,16 +12,22 @@ object Main {
     // 1 234, 12 34, 123 4
     // 1 2 34, 12 3 4, 1 23 4
     // 1 2 3 4
+    println(string)
+    val OPERATORS = "-+"
     val slices = (1 until string.length).flatMap(
                   (1 until string.length).combinations(_)).map(
-                    Vector(0) ++ _ ++ Vector(string.length))
-    slices.foreach { println }
+                    Vector(0) ++ _ ++ Vector(string.length)).map(
+                      _.sliding(2).toVector)
+    for (slice <- slices) {
+      val operations = product(OPERATORS, slice.length - 1).map(Vector('+') ++ _)
+      println(slice, operations)
+    }
   }
 
   def main(args: Array[String]) {
     val inputs = (if (args.length < 1) io.Source.stdin
                  else io.Source.fromFile(args(0))).getLines().toVector
 
-    for (input <- inputs) get_all_substrings(input)
+    inputs.map(get_all_substrings(_))
   }
 }
