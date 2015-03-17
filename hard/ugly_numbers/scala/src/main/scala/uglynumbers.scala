@@ -1,8 +1,8 @@
 object Main {
-  def product[A](string:Traversable[A], repeat:Int = 1): Vector[Vector[A]] = {
-    if (repeat == 1) string.map(Vector(_)).toVector
+  def product[A](string:Traversable[A], repeat:Int = 1): Traversable[Vector[A]] = {
+    if (repeat == 1) string.map(Vector(_))
     else {
-      product(string, repeat - 1).flatMap(a => string.map(a ++ Vector(_))).toVector
+      product(string, repeat - 1).flatMap(a => string.map(a :+ _))
     }
   }
 
