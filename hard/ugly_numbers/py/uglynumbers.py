@@ -72,12 +72,13 @@ def get_all_substrings(string):
 
     yield [int(string)]
 
-    for split in splits:
-        # Create a power set of '-, +' of the length of the split, with an
-        # additional token for the leading 0 position
-        # (1, 2) -> [(-, -, -), (-, -, +), (-, +, -), ...
-        signs = product(OPERATORS, repeat=len(split))
+    # Create a power set of '-, +' of the length of the split, with an
+    # additional token for the leading 0 position
+    # (1, 2) -> [(-, -, -), (-, -, +), (-, +, -), ...
+    signs = dict([(n, list(product(OPERATORS, repeat=n)))
+                  for n in range(1, len(string))])
 
+    for split in splits:
         # Convert the (1, 2) string split specifiers into slice notation
         # ex (1, 2) for 'abcd' 
         # zip([0, 1, 2, 4], [1, 2, 4]) == [(0, 1), (1, 2), (2, 4)]
@@ -92,7 +93,7 @@ def get_all_substrings(string):
         ## string_ops = map(lambda sign: list(chain.from_iterable(
         ##                                zip(('+',) + sign, sliced_string))),
         ##                  signs)
-        operations = map(lambda sign: zip(('+',) + sign, sliced_string), signs)
+        operations = map(lambda sign: zip(('+',) + sign, sliced_string), signs[len(split)])
 
         for operation in operations:
             # Apply the operator to the operand
@@ -102,7 +103,15 @@ def get_all_substrings(string):
 
 
 def is_ugly(n):
-    if n == 0 or n % 2 == 0 or n % 3 == 0 or n % 5 == 0 or n % 7 == 0:
+    if n == 0:
+        return True
+    if n % 2 == 0:
+        return True
+    if n % 3 == 0:
+        return True
+    if n % 5 == 0:
+        return True
+    if n % 7 == 0:
         return True
     return False
 
