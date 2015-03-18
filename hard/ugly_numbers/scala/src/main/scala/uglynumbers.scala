@@ -23,18 +23,18 @@ object Main {
     val operations = (1 until string.length).map( n =>
                        (n, product(OPERATORS.values, n).map(
                          OPERATORS('+') +: _))).toMap
-    val splits = (1 until string.length).flatMap(
+    val splits = (1 until string.length).view.flatMap(
                    (1 until string.length).combinations(_))
-    val slices = splits.map(0 +: _ :+ string.length).view.map(
+    val slices = splits.map(0 +: _ :+ string.length).map(
                    _.sliding(2).toVector)
     val sliced_string = slices.map(slice =>
                           slice.map {
                             case Vector(start, end) =>
                               string.slice(start, end).toLong
                           })
-    return sliced_string.view.flatMap { sliced =>
+    return sliced_string.flatMap { sliced =>
       operations(sliced.length - 1).map { operation =>
-        operation.zip(sliced).map {
+        (operation, sliced).zipped.map {
           case (func, arg) => func(arg)
         }
       }
