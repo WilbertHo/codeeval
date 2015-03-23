@@ -18,18 +18,15 @@ def longest_common_subsequence_recur(s1, s2):
         returns:
             longest common subsequence: string
     """
-    def lcs_r(s1, s2, accum, s):
+    def lcs_r(s1, s2, s):
         if not s1 or not s2:
-            return accum.update({len(s): s})
+            return s
         if s1[-1] == s2[-1]:
-            return lcs_r(s1[:-1], s2[:-1], accum, s1[-1] + s)
+            return lcs_r(s1[:-1], s2[:-1], s1[-1] + s)
         else:
-            return max(lcs_r(s1[:-1], s2, accum, s),
-                       lcs_r(s1, s2[:-1], accum, s))
+            return max([lcs_r(s1[:-1], s2, s), lcs_r(s1, s2[:-1], s)], key=len)
 
-    accum = dict()
-    lcs_r(s1, s2, accum, '')
-    return accum.get(max(accum.keys()))
+    return lcs_r(s1, s2, '')
 
 
 def longest_common_subsequence(s1, s2):
