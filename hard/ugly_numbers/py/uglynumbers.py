@@ -50,79 +50,63 @@ for each test case, each one on a new line. E.g.
 6
 64
 """
-from collections import deque
 import fileinput
-from itertools import chain, combinations, islice, permutations, product
+from itertools import izip, product
+from operator import add, sub
 
 
 def get_all_substrings(string):
-    """ Return all substrings of input string combined with '-' and '+'
-    """
-    OPERATORS = '-+'
-    # Generate all the possible places we could split the string
-    # Ex, for string 'abcde'
-    # 1 split -> a bcde, ab cde, abc de, abcd e
-    # 2 splits -> a b cde, a bc de
-    # We'll model where to split the string by creating power sets
-    # for length starting from 2 until the length of the input string
-    # (1,), (2,), ..., (1, 2,), (2, 3,), ..., (1, 2, 3, 4)
-    splits = list(chain.from_iterable(
-                combinations(range(1, len(string)), n)
-                for n in range(1, len(string))))
+    num_ugly = 0
+    string_n = map(int, string)[::-1]
 
-    yield [int(string)]
+    for ops in product([None, True, False], repeat=len(string)-1):
+        # Iterate over a pseudo-power set of no-op, add and sub
+        # with None being no-op, True being add, False being sub
+        # The reason for this is True/False comparisons are fast(er)
+        # [(, , ), (, ,+), (,,-),
+        #  (,+,+), (,-,-)
+        # So we can combine the string and one of the op tuples, ex:
+        # 1234, ( , , ) -> 1234
+        # 1234, ( ,+,+) -> 12+3+4
+        # 1234, ( ,+,-) -> 12+3-4
+        accum = 0
+        mod = 0
+        for digit, op in izip(string_n, reversed((None,) + ops)):
+            if op is None:
+                accum += digit * 10 ** mod
+                mod += 1
+            elif op:
+                accum += digit * 10 ** mod
+                mod = 0
+            else:
+                accum = -1 * (accum + digit * 10 ** mod)
+                mod = 0
+        # Check if the accum is ugly, so we don't have to iterate again
+        # Save some time, again, by not calling a function
+        if accum == 0:
+            num_ugly +=1
+            continue
+        if accum % 2 == 0:
+            num_ugly +=1
+            continue
+        if accum % 3 == 0:
+            num_ugly +=1
+            continue
+        if accum % 5 == 0:
+            num_ugly +=1
+            continue
+        if accum % 7 == 0:
+            num_ugly +=1
+            continue
 
-    # Create a power set of '-, +' of the length of the split, with an
-    # additional token for the leading 0 position
-    # (1, 2) -> [(-, -, -), (-, -, +), (-, +, -), ...
-    signs = dict([(n, list(product(OPERATORS, repeat=n)))
-                  for n in range(1, len(string))])
-
-    for split in splits:
-        # Convert the (1, 2) string split specifiers into slice notation
-        # ex (1, 2) for 'abcd' 
-        # zip([0, 1, 2, 4], [1, 2, 4]) == [(0, 1), (1, 2), (2, 4)]
-        slices = zip(*(islice((0,) + split + (len(string),), n, None)
-                       for n in xrange(2)))
-        sliced_string = map(lambda (start, end): int(string[start:end]),
-                            slices)
-
-        # Zip up the signs with the sliced up string
-        # ex: zip(['-', '+', '-'],
-        #         ['a', 'bc', 'cde'])
-        ## string_ops = map(lambda sign: list(chain.from_iterable(
-        ##                                zip(('+',) + sign, sliced_string))),
-        ##                  signs)
-        operations = map(lambda sign: zip(('+',) + sign, sliced_string), signs[len(split)])
-
-        for operation in operations:
-            # Apply the operator to the operand
-            # ex: ['-', '1', '-', '2', '+', '345']
-            yield map(lambda (op, operand): operand * -1 if op == '-' else operand,
-                       operation)
-
-
-def is_ugly(n):
-    if n == 0:
-        return True
-    if n % 2 == 0:
-        return True
-    if n % 3 == 0:
-        return True
-    if n % 5 == 0:
-        return True
-    if n % 7 == 0:
-        return True
-    return False
+    return num_ugly
 
 
 def main():
     lines = [line.strip() for line in fileinput.input() if line]
 
     for line in lines:
-        substrings = get_all_substrings(line)
-        print len(filter(None, [is_ugly(sum(substring))
-                                for substring in substrings]))
+        print get_all_substrings(line)
 
 
 if __name__ == '__main__':
